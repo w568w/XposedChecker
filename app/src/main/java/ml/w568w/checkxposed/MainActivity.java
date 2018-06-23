@@ -9,6 +9,7 @@ import android.os.Process;
 import android.support.annotation.Keep;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -37,24 +39,25 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 import de.robv.android.xposed.XposedBridge;
-
-import static android.content.Context.MODE_PRIVATE;
+import de.robv.android.xposed.XposedHelpers;
 
 /**
  * @author w568w
  */
 public class MainActivity extends AppCompatActivity {
-    private static String CHECK_ITEM[] = {
+    private static String[] CHECK_ITEM = {
             "载入Xposed工具类",
-            "寻找特征静态链接库",
+            "寻找特征动态链接库",
             "代码堆栈寻找调起者",
             "检测Xposed安装情况",
             "判定系统方法调用钩子",
             "检测虚拟Xposed环境",
             "寻找Xposed运行库文件",
             "内核查找Xposed链接库",
+            "环境变量特征字判断",
     };
     String[] rootStatus = {"出错", "未发现Root", "发现Root"};
+    private ArrayList<Integer> status = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +67,10 @@ public class MainActivity extends AppCompatActivity {
             FutureTask futureTask = new FutureTask<>(new UnpackThread());
             new Thread(futureTask).start();
             futureTask.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
+            futureTask = new FutureTask<>(new CheckThread());
+            new Thread(futureTask).start();
+            futureTask.get();
+        } catch (Exception e) {
             e.printStackTrace();
         }
         setContentView(R.layout.activity_main);
@@ -98,40 +102,47 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 RelativeLayout layout = (RelativeLayout) LayoutInflater.from(MainActivity.this).inflate(R.layout.items, null);
-
                 TextView textView1 = (TextView) layout.findViewById(R.id.check_item);
                 TextView textView2 = (TextView) layout.findViewById(R.id.check_result);
-                try {
-                    Method method = MainActivity.class.getDeclaredMethod("check" + (position + 1));
-                    method.setAccessible(true);
-                    boolean pass = (int) method.invoke(MainActivity.this) == 0;
-                    if (position == CHECK_ITEM.length) {
-                        textView1.setText("Root检查");
-                        textView2.setText(rootStatus[(int) method.invoke(MainActivity.this) + 1]);
+                int s = status.get(position);
+                boolean pass = s == 0;
+                if (position == CHECK_ITEM.length) {
+                    textView1.setText("Root检查");
+                    textView2.setText(rootStatus[s + 1]);
 
-                    } else {
-                        textView1.setText(CHECK_ITEM[position]);
-                        textView2.setText((pass ? "未发现Xposed" : "发现Xposed"));
-                    }
-                    textView2.setTextColor(pass ? Color.GREEN : Color.RED);
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                } else {
+                    textView1.setText(CHECK_ITEM[position]);
+                    textView2.setText((pass ? "未发现Xposed" : "发现Xposed"));
                 }
+                textView2.setTextColor(pass ? Color.GREEN : Color.RED);
 
                 return layout;
             }
         });
-        int checkCode = check1() + check2() + check3() + check4() + check5() + check6() + check7() + check8();
+        int checkCode = 0;
+        for (int i = 0; i < CHECK_ITEM.length; ++i) {
+            checkCode += status.get(i);
+        }
         if (checkCode > 0) {
             textView.setTextColor(Color.RED);
             textView.setText("你安装了 Xposed ! 可信度: " + checkCode + "/" + CHECK_ITEM.length);
         } else {
             textView.setTextColor(Color.GREEN);
             textView.setText("你没有安装 Xposed !");
+        }
+    }
+
+    private class CheckThread implements Callable<Void> {
+
+        @Override
+        public Void call() throws Exception {
+            status.clear();
+            for (int i = 0; i <= CHECK_ITEM.length; i++) {
+                Method method = MainActivity.class.getDeclaredMethod("check" + (i + 1));
+                method.setAccessible(true);
+                status.add((int) method.invoke(MainActivity.this));
+            }
+            return null;
         }
     }
 
@@ -301,6 +312,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Keep
     private int check9() {
+        return System.getenv("CLASSPATH").contains("XposedBridge") ? 1 : 0;
+    }
+
+    @Keep
+    private int check10() {
         try {
             return RootCheckerUtils.detect(this) ? 1 : 0;
         } catch (Throwable t) {
@@ -313,11 +329,13 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public Void call() throws Exception {
-            InputStream inputStream = getAssets().open("checkman");
-            OutputStream outputStream = openFileOutput("checkman", MODE_PRIVATE);
-            int bit;
-            while ((bit = inputStream.read()) != -1) {
-                outputStream.write(bit);
+            if(!new File(getFilesDir().getAbsolutePath() + "/checkman").exists()) {
+                InputStream inputStream = getAssets().open("checkman");
+                OutputStream outputStream = openFileOutput("checkman", MODE_PRIVATE);
+                int bit;
+                while ((bit = inputStream.read()) != -1) {
+                    outputStream.write(bit);
+                }
             }
             setFilePermissions(getFilesDir(), 0777, -1, -1);
             setFilePermissions(getFilesDir().getAbsolutePath() + "/checkman", 0777, -1, -1);
