@@ -4,12 +4,11 @@ import android.content.DialogInterface;
 import android.content.pm.PackageInfo;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Process;
 import android.support.annotation.Keep;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,13 +16,14 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jrummyapps.android.shell.CommandResult;
 import com.jrummyapps.android.shell.Shell;
+import com.unionpay.mobile.device.utils.RootCheckerUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -37,7 +37,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * @author w568w
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
             "寻找Xposed运行库文件",
             "内核查找Xposed链接库",
     };
+    String[] rootStatus = {"出错", "未发现Root", "发现Root"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,8 +73,11 @@ public class MainActivity extends AppCompatActivity {
         final TextView textView = (TextView) findViewById(R.id.a);
         final ListView listView = (ListView) findViewById(R.id.b);
         final TextView about = (TextView) findViewById(R.id.about);
+        final TextView donation = (TextView) findViewById(R.id.donation);
         about.getPaint().setAntiAlias(true);
         about.getPaint().setUnderlineText(true);
+        donation.getPaint().setAntiAlias(true);
+        donation.getPaint().setUnderlineText(true);
         listView.setDivider(null);
         listView.setAdapter(new BaseAdapter() {
             @Override
@@ -102,7 +107,8 @@ public class MainActivity extends AppCompatActivity {
                     boolean pass = (int) method.invoke(MainActivity.this) == 0;
                     if (position == CHECK_ITEM.length) {
                         textView1.setText("Root检查");
-                        textView2.setText((pass ? "未发现Root" : "发现Root"));
+                        textView2.setText(rootStatus[(int) method.invoke(MainActivity.this) + 1]);
+
                     } else {
                         textView1.setText(CHECK_ITEM[position]);
                         textView2.setText((pass ? "未发现Xposed" : "发现Xposed"));
@@ -131,8 +137,23 @@ public class MainActivity extends AppCompatActivity {
 
     public void about(View view) {
         new AlertDialog.Builder(this).setTitle("关于")
-                .setMessage("由w568w开发...\n最近微信的事儿闹得纷纷扬扬，这款应用可以让你了解你的防Xposed检测模块到底有没有效果。")
+                .setMessage("由w568w开发...\n最近微信的事儿闹得纷纷扬扬，这款应用可以让你了解你的防Xposed检测模块到底有没有效果。\n\nDEBUG INFO:PID=" + Process.myPid())
                 .setPositiveButton("我知道了", null)
+                .show();
+    }
+
+    public void donation(View view) {
+        new AlertDialog.Builder(this).setTitle("关于捐赠")
+                .setMessage("写这个应用也花了不少时间收集代码,\n希望您能给我买根辣条，支持我后续的开发和防检测模块的开发进程...")
+                .setPositiveButton("支付宝捐赠", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (!AlipayDonate.startAlipayClient(MainActivity.this, "a6x06490c5kpcbnsr84hr23")) {
+                            Toast.makeText(MainActivity.this, "朋友你看起来大概是没有安装支付宝...", Toast.LENGTH_LONG).show();
+                        }
+
+                    }
+                })
                 .show();
     }
 
@@ -280,7 +301,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Keep
     private int check9() {
-        return Shell.SU.available() ? 1 : 0;
+        try {
+            return RootCheckerUtils.detect(this) ? 1 : 0;
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return -1;
+        }
     }
 
     private class UnpackThread implements Callable<Void> {
@@ -331,5 +357,4 @@ public class MainActivity extends AppCompatActivity {
             return setFilePermissions(new File(file), chmod, uid, gid);
         }
     }
-
 }
