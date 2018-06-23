@@ -140,7 +140,11 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i <= CHECK_ITEM.length; i++) {
                 Method method = MainActivity.class.getDeclaredMethod("check" + (i + 1));
                 method.setAccessible(true);
-                status.add((int) method.invoke(MainActivity.this));
+                try {
+                    status.add((int) method.invoke(MainActivity.this));
+                } catch (Throwable e) {
+                    status.add(0);
+                }
             }
             return null;
         }
@@ -329,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public Void call() throws Exception {
-            if(!new File(getFilesDir().getAbsolutePath() + "/checkman").exists()) {
+            if (!new File(getFilesDir().getAbsolutePath() + "/checkman").exists()) {
                 InputStream inputStream = getAssets().open("checkman");
                 OutputStream outputStream = openFileOutput("checkman", MODE_PRIVATE);
                 int bit;
