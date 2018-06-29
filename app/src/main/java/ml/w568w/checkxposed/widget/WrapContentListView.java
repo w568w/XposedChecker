@@ -1,4 +1,4 @@
-package ml.w568w.checkxposed;
+package ml.w568w.checkxposed.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;

@@ -3,7 +3,7 @@
 // (powered by Fernflower decompiler)
 //
 
-package ml.w568w.checkxposed;
+package ml.w568w.checkxposed.util;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;

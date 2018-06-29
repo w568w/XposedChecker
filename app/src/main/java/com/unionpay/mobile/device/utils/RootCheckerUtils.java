@@ -60,10 +60,10 @@ public class RootCheckerUtils {
 
     public static boolean detect(Context context) {
         return checkForBinary("su")
-                || Shell.SU.available()
                 || isAnyPackageFromListInstalled(context, KNOWN_ROOT_APPS_PACKAGES)
                 || isAnyPackageFromListInstalled(context, KNOWN_DANGEROUS_APPS_PACKAGES)
-                || isAnyPackageFromListInstalled(context, KNOWN_ROOT_CLOAKING_PACKAGES);
+                || isAnyPackageFromListInstalled(context, KNOWN_ROOT_CLOAKING_PACKAGES)
+                || Shell.SU.available();
     }
 
 }

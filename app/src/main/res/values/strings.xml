@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="no_xposed">你没有安装 Xposed !</string>
+    <string name="found_xposed">你安装了 Xposed ! 可信度: %1$d/%2$d</string>
+    <string name="root_check">Root检查</string>
+    <string name="item_no_xposed">未发现Xposed</string>
+    <string name="item_found_xposed">发现Xposed</string>
+    <string name="about">由w568w开发... 最近微信的事儿闹得纷纷扬扬，这款应用可以让你了解你的防Xposed检测模块到底有没有效果。\\nDEBUG INFO:PID=%1$d</string>
+    <string name="donation">写这个应用也花了不少时间收集代码, 希望您能给我买根辣条，支持我后续的开发和防检测模块的开发进程...</string>
+</resources>

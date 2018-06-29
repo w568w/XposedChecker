@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="ml.w568w.checkxposed.MainActivity">
+    tools:context="ml.w568w.checkxposed.ui.MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -22,7 +22,6 @@
                 android:layout_gravity="center"
                 android:layout_margin="16dp"
                 android:gravity="center"
-                android:text="Hello World!"
                 android:textStyle="bold" />
         </android.support.v7.widget.CardView>
 
@@ -31,10 +30,11 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp">
 
-            <ml.w568w.checkxposed.WrapContentListView
+            <ml.w568w.checkxposed.widget.WrapContentListView
                 android:id="@+id/b"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:divider="@null" />
         </android.support.v7.widget.CardView>
 
         <android.support.v7.widget.CardView
