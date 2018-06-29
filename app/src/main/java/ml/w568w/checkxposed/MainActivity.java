@@ -349,12 +349,6 @@ public class MainActivity extends AppCompatActivity {
         /**
          * 修改文件权限
          * setFilePermissions(file, 0777, -1, -1);
-         *
-         * @param file
-         * @param chmod
-         * @param uid
-         * @param gid
-         * @return
          */
         public boolean setFilePermissions(File file, int chmod, int uid, int gid) {
             if (file != null) {
