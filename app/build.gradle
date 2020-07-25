@@ -5,10 +5,11 @@ android {
     buildToolsVersion "25.0.3"
     defaultConfig {
         applicationId "ml.w568w.checkxposed"
-        minSdkVersion 10
+        minSdkVersion 21
+        //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 23
-        versionCode 5
-        versionName "5"
+        versionCode 6
+        versionName "6"
     }
     buildTypes {
         release {
@@ -16,10 +17,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    externalNativeBuild {
+        cmake {
+            path file('CMakeLists.txt')
+        }
+    }
+    ndkVersion '21.3.6528147'
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    //implementation 'me.jfenn:Attribouter:0.1.8'
     compile 'com.android.support:appcompat-v7:23.+'
     provided 'de.robv.android.xposed:api:53'
     compile 'com.android.support:cardview-v7:23.+'

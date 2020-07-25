@@ -20,7 +20,7 @@ public class RootCheckerUtils {
     static {
         PATHS_THAT_SHOULD_NOT_BE_WRTIABLE = new String[]{"/system", "/system/bin", "/system/sbin", "/system/xbin", "/vendor/bin", "/sbin", "/etc"};
         KNOWN_DANGEROUS_APPS_PACKAGES = new String[]{"com.koushikdutta.rommanager", "com.dimonvideo.luckypatcher", "com.chelpus.lackypatch", "com.ramdroid.appquarantine"};
-        KNOWN_ROOT_CLOAKING_PACKAGES = new String[]{"com.devadvance.rootcloak", "de.robv.android.xposed.installer", "com.saurik.substrate", "com.devadvance.rootcloakplus", "com.zachspong.temprootremovejb", "com.amphoras.hidemyroot", "com.formyhm.hideroot"};
+        KNOWN_ROOT_CLOAKING_PACKAGES = new String[]{"com.yaerin.xposed.hide", "com.devadvance.rootcloak", "de.robv.android.xposed.installer", "com.saurik.substrate", "com.devadvance.rootcloakplus", "com.zachspong.temprootremovejb", "com.amphoras.hidemyroot", "com.formyhm.hideroot"};
         KNOWN_ROOT_APPS_PACKAGES = new String[]{"com.noshufou.android.su", "com.noshufou.android.su.elite", "eu.chainfire.supersu", "com.koushikdutta.superuser", "com.thirdparty.superuser", "com.yellowes.su"};
     }
 
@@ -49,8 +49,8 @@ public class RootCheckerUtils {
             try {
                 pm.getPackageInfo(str2, 0);
                 return true;
-            } catch (PackageManager.NameNotFoundException localNameNotFoundException) {
-                localNameNotFoundException.printStackTrace();
+            } catch (PackageManager.NameNotFoundException ignored) {
+
             }
 
         }

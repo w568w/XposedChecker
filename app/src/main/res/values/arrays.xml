@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="inspect_item">
+        <item>Load Xposed bridge</item>
+        <item>Seek dynamic link library</item>
+        <item>Seek caller in stacktrace</item>
+        <item>Detect Xposed installation</item>
+        <item>Determine method signature</item>
+        <item>Detect virtual Xposed env</item>
+        <item>Seek Xposed runtime</item>
+        <item>Seek Xposed link library in kernel</item>
+        <item>Inspect environmental variable</item>
+    </string-array>
+    <string-array name="root_status">
+        <item>Error</item>
+        <item>No root</item>
+        <item>Found root</item>
+    </string-array>
+</resources>

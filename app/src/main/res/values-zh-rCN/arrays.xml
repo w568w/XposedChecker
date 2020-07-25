@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="inspect_item">
+        <item>载入Xposed工具类</item>
+        <item>寻找特征动态链接库</item>
+        <item>代码堆栈寻找调起者</item>
+        <item>检测Xposed安装情况</item>
+        <item>判定系统方法调用钩子</item>
+        <item>检测虚拟Xposed环境</item>
+        <item>寻找Xposed运行库文件</item>
+        <item>内核查找Xposed链接库</item>
+        <item>环境变量特征字判断</item>
+    </string-array>
+    <string-array name="root_status">
+        <item>出错</item>
+        <item>未发现Root</item>
+        <item>发现Root</item>
+    </string-array>
+</resources>

@@ -13,16 +13,32 @@
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp">
+            android:layout_margin="8dp">
 
-            <TextView
-                android:id="@+id/a"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="16dp"
-                android:gravity="center"
-                android:textStyle="bold" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/a"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="16dp"
+                    android:gravity="center"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/main_refresh"
+                    style="@style/CardButton"
+                    android:clickable="true"
+                    android:drawableStart="@drawable/ic_baseline_refresh_24"
+                    android:focusable="true"
+                    android:onClick="refresh"
+                    android:text="@string/refresh" />
+            </LinearLayout>
+
         </android.support.v7.widget.CardView>
 
         <android.support.v7.widget.CardView
@@ -46,8 +62,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_margin="8dp"
-                android:text="提醒：可信度低不代表存在Xposed的可能性低\n实际上，只要可信度不为0，就说明一定存在Xposed框架。" />
+                android:padding="16dp"
+                android:text="@string/tips" />
         </android.support.v7.widget.CardView>
 
 
@@ -55,7 +71,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:padding="16dp">
 
             <TextView
                 android:id="@+id/about"

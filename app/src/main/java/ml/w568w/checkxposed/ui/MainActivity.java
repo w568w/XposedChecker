@@ -1,8 +1,11 @@
 package ml.w568w.checkxposed.ui;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
@@ -20,6 +23,7 @@ import android.widget.Toast;
 
 import com.jrummyapps.android.shell.CommandResult;
 import com.jrummyapps.android.shell.Shell;
+import com.tencent.bugly.crashreport.CrashReport;
 import com.unionpay.mobile.device.utils.RootCheckerUtils;
 
 import java.io.BufferedReader;
@@ -38,45 +42,42 @@ import java.util.concurrent.FutureTask;
 import de.robv.android.xposed.XposedBridge;
 import ml.w568w.checkxposed.R;
 import ml.w568w.checkxposed.util.AlipayDonate;
+import ml.w568w.checkxposed.util.NativeDetect;
 
 /**
  * @author w568w
  */
 public class MainActivity extends AppCompatActivity {
-    private static final String[] CHECK_ITEM = {
-            "载入Xposed工具类",
-            "寻找特征动态链接库",
-            "代码堆栈寻找调起者",
-            "检测Xposed安装情况",
-            "判定系统方法调用钩子",
-            "检测虚拟Xposed环境",
-            "寻找Xposed运行库文件",
-            "内核查找Xposed链接库",
-            "环境变量特征字判断",
-    };
-    private static final String[] ROOT_STATUS = {"出错", "未发现Root", "发现Root"};
+    private static String[] CHECK_ITEM;
+    private static String[] ROOT_STATUS;
 
     private ArrayList<Integer> status = new ArrayList<>();
     private static final int ALL_ALLOW = 0777;
+    ListView mListView;
+    TextView mStatus;
+    BaseAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle("Xposed Checker");
+        CHECK_ITEM = getResources().getStringArray(R.array.inspect_item);
+        ROOT_STATUS = getResources().getStringArray(R.array.root_status);
         try {
-            FutureTask futureTask = new FutureTask<>(new UnpackThread());
-            new Thread(futureTask).start();
-            futureTask.get();
 
-            futureTask = new FutureTask<>(new CheckThread());
+//            FutureTask<Void> futureTask = new FutureTask<>(new UnpackThread());
+//            new Thread(futureTask).start();
+//            futureTask.get();
+
+            FutureTask<Void> futureTask = new FutureTask<>(new CheckThread());
             new Thread(futureTask).start();
             futureTask.get();
         } catch (Exception e) {
             e.printStackTrace();
         }
         setContentView(R.layout.activity_main);
-        final TextView textView = (TextView) findViewById(R.id.a);
-        final ListView listView = (ListView) findViewById(R.id.b);
+        mStatus = (TextView) findViewById(R.id.a);
+        mListView = (ListView) findViewById(R.id.b);
         final TextView about = (TextView) findViewById(R.id.about);
         final TextView donation = (TextView) findViewById(R.id.donation);
         if (about != null) {
@@ -88,8 +89,8 @@ public class MainActivity extends AppCompatActivity {
             donation.getPaint().setUnderlineText(true);
         }
 
-        if (listView != null) {
-            listView.setAdapter(new BaseAdapter() {
+        if (mListView != null) {
+            mAdapter = new BaseAdapter() {
                 @Override
                 public int getCount() {
                     return CHECK_ITEM.length + 1;
@@ -107,37 +108,43 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
-                    RelativeLayout layout = (RelativeLayout) LayoutInflater.from(MainActivity.this).inflate(R.layout.items, null);
-                    TextView textView1 = (TextView) layout.findViewById(R.id.check_item);
-                    TextView textView2 = (TextView) layout.findViewById(R.id.check_result);
+                    @SuppressLint("InflateParams")
+                    RelativeLayout itemLayout = (RelativeLayout) LayoutInflater.from(MainActivity.this).inflate(R.layout.items, null);
+                    TextView name = (TextView) itemLayout.findViewById(R.id.check_item);
+                    TextView result = (TextView) itemLayout.findViewById(R.id.check_result);
                     int itemStatus = status.get(position);
                     boolean pass = itemStatus == 0;
                     if (position == CHECK_ITEM.length) {
-                        textView1.setText(R.string.root_check);
-                        textView2.setText(ROOT_STATUS[itemStatus + 1]);
+                        name.setText(R.string.root_check);
+                        result.setText(ROOT_STATUS[itemStatus + 1]);
                     } else {
-                        textView1.setText(CHECK_ITEM[position]);
-                        textView2.setText((pass ? getString(R.string.item_no_xposed) : getString(R.string.item_found_xposed)));
+                        name.setText(CHECK_ITEM[position]);
+                        result.setText((pass ? getString(R.string.item_no_xposed) : getString(R.string.item_found_xposed)));
                     }
-                    textView2.setTextColor(pass ? Color.GREEN : Color.RED);
-                    return layout;
+                    result.setTextColor(pass ? Color.GREEN : Color.RED);
+                    return itemLayout;
                 }
-            });
+            };
+            mListView.setAdapter(mAdapter);
         }
+        refreshStatus();
 
+    }
+
+    private void refreshStatus() {
         int checkCode = 0;
         for (int i = 0; i < CHECK_ITEM.length; ++i) {
             checkCode += status.get(i);
         }
-        if (textView != null) {
+        if (mStatus != null) {
             if (checkCode > 0) {
 
-                textView.setTextColor(Color.RED);
+                mStatus.setTextColor(Color.RED);
 
-                textView.setText(String.format(getString(R.string.found_xposed), checkCode, CHECK_ITEM.length));
+                mStatus.setText(String.format(getString(R.string.found_xposed), checkCode, CHECK_ITEM.length));
             } else {
-                textView.setTextColor(Color.GREEN);
-                textView.setText(R.string.no_xposed);
+                mStatus.setTextColor(Color.GREEN);
+                mStatus.setText(R.string.no_xposed);
             }
         }
     }
@@ -153,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     status.add((int) method.invoke(MainActivity.this));
                 } catch (Throwable e) {
+                    CrashReport.postCatchedException(e);
                     status.add(0);
                 }
             }
@@ -160,21 +168,52 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void refresh(final View view) {
+        final TextView textView = (TextView) view;
+        textView.setText(R.string.refreshing);
+        view.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    FutureTask<Void> futureTask = new FutureTask<>(new CheckThread());
+                    new Thread(futureTask).start();
+                    futureTask.get();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                mAdapter.notifyDataSetChanged();
+                refreshStatus();
+                textView.setText(R.string.refresh);
+            }
+        }, 200);
+
+    }
+
     public void about(View view) {
-        new AlertDialog.Builder(this).setTitle("关于")
+        new AlertDialog.Builder(this).setTitle(getString(R.string.about_title))
                 .setMessage(String.format(getString(R.string.about), Process.myPid()))
-                .setPositiveButton("我知道了", null)
+                .setPositiveButton(R.string.OK, null)
+                .setNeutralButton(R.string.about_me, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        try {
+                            startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://w568w.eu.org/about.w568w.html")));
+                        } catch (Throwable ignored) {
+                        }
+                    }
+                })
                 .show();
     }
 
     public void donation(View view) {
-        new AlertDialog.Builder(this).setTitle("关于捐赠")
+        new AlertDialog.Builder(this).setTitle(getString(R.string.donation_title))
                 .setMessage(getString(R.string.donation))
-                .setPositiveButton("支付宝捐赠", new DialogInterface.OnClickListener() {
+                .setPositiveButton(getString(R.string.Alipay), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (!AlipayDonate.startAlipayClient(MainActivity.this, "a6x06490c5kpcbnsr84hr23")) {
-                            Toast.makeText(MainActivity.this, "朋友你看起来大概是没有安装支付宝...", Toast.LENGTH_LONG).show();
+                        if (AlipayDonate.startAlipayClient(MainActivity.this, "a6x06490c5kpcbnsr84hr23")) {
+                            Toast.makeText(MainActivity.this, R.string.coffee_please, Toast.LENGTH_SHORT).show();
                         }
 
                     }
@@ -202,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean testUseClassDirectly() {
         try {
-            XposedBridge.log("fuck wechat");
+            XposedBridge.log("fuck");
             return true;
         } catch (Throwable e) {
             e.printStackTrace();
@@ -305,8 +344,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Keep
     private int check8() {
-        CommandResult commandResult = Shell.run(getFilesDir().getAbsolutePath() + "/checkman " + Process.myPid());
-        return commandResult.isSuccessful() ? 1 : 0;
+//        CommandResult commandResult = Shell.run(getFilesDir().getAbsolutePath() + "/checkman " + Process.myPid());
+//        return commandResult.isSuccessful() ? 1 : 0;
+        try {
+            return NativeDetect.detectXposed() ? 1 : 0;
+        } catch (Throwable t) {
+            CrashReport.postCatchedException(t);
+            return 0;
+        }
     }
 
     @Keep
@@ -317,6 +362,7 @@ public class MainActivity extends AppCompatActivity {
     @Keep
     private int check10() {
         try {
+
             return RootCheckerUtils.detect(this) ? 1 : 0;
         } catch (Throwable t) {
             t.printStackTrace();
@@ -354,7 +400,7 @@ public class MainActivity extends AppCompatActivity {
                     int result = (Integer) setPermissions.invoke(null, file, chmod, uid, gid);
 
                     return result == 0;
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     e.printStackTrace();
                 }
 

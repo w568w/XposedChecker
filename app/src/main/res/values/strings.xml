@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="no_xposed">你没有安装 Xposed !</string>
-    <string name="found_xposed">你安装了 Xposed ! 可信度: %1$d/%2$d</string>
-    <string name="root_check">Root检查</string>
-    <string name="item_no_xposed">未发现Xposed</string>
-    <string name="item_found_xposed">发现Xposed</string>
-    <string name="about">由w568w开发... 最近微信的事儿闹得纷纷扬扬，这款应用可以让你了解你的防Xposed检测模块到底有没有效果。\\nDEBUG INFO:PID=%1$d</string>
-    <string name="donation">写这个应用也花了不少时间收集代码, 希望您能给我买根辣条，支持我后续的开发和防检测模块的开发进程...</string>
+    <string name="no_xposed">Xposed is not installed!</string>
+    <string name="found_xposed">Xposed is installed! Credibility: %1$d/%2$d</string>
+    <string name="root_check">Root Check</string>
+    <string name="item_no_xposed">Pass</string>
+    <string name="item_found_xposed">Found</string>
+    <string name="about">Developed by w568w… The app helps you assess whether your Xposed hiding module really works. DEBUG INFO:PID=%1$d</string>
+    <string name="donation">I\'m a student in my gap year.Buy me a cup of coffee to encourage my development. Thanks you very much! :)</string>
+    <string name="tips">Tip: A low credibility doesn\'t claim low possibility of the presence of Xposed.\nIn fact,there must be something like Xposed so long as it is not 0.</string>
+    <string name="about_title">About app</string>
+    <string name="OK">Got it</string>
+    <string name="donation_title">Donation</string>
+    <string name="Alipay">By Alipay</string>
+    <string name="refresh">Refresh</string>
+    <string name="about_me">About me</string>
+    <string name="refreshing">Refreshing…</string>
+    <string name="coffee_please">Coffee,please! :D</string>
 </resources>

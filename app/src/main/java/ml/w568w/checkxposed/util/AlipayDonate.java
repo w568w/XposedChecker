@@ -7,18 +7,14 @@ package ml.w568w.checkxposed.util;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import java.net.URISyntaxException;
+import android.net.Uri;
 
 /**
  * @author didikee
  */
 public class AlipayDonate {
-    private static final String INTENT_URL_FORMAT = "intent://platformapi/startapp?saId=10000007&clientVersion=3.7.0.0718&qrcode=https%3A%2F%2Fqr.alipay.com%2F{payCode}%3F_s%3Dweb-other&_t=1472443966571#Intent;scheme=alipayqr;package=com.eg.android.AlipayGphone;end";
+    private static final String INTENT_URL_FORMAT = "alipays://platformapi/startapp?saId=10000007&clientVersion=3.7.0.0718&qrcode=https%3A%2F%2Fqr.alipay.com%2F{payCode}%3F_s%3Dweb-other";
 
     public AlipayDonate() {
     }
@@ -29,14 +25,11 @@ public class AlipayDonate {
 
     public static boolean startIntentUrl(Activity activity, String intentFullUrl) {
         try {
-            Intent e = Intent.parseUri(intentFullUrl, 1);
+            Intent e = new Intent().setData(Uri.parse(intentFullUrl));
             activity.startActivity(e);
             return true;
-        } catch (URISyntaxException var3) {
+        } catch (ActivityNotFoundException var3) {
             var3.printStackTrace();
-            return false;
-        } catch (ActivityNotFoundException var4) {
-            var4.printStackTrace();
             return false;
         }
     }
