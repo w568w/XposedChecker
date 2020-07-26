@@ -16,4 +16,22 @@
     <string name="about_me">关于我</string>
     <string name="refreshing">刷新中…</string>
     <string name="coffee_please">请给我买杯咖啡！</string>
+    <string name="item_1">尝试加载类 de.robv.android.xposed.XposedHelpers… [%1$s]\n尝试调用类 de.robv.android.xposed.XposedHelpers… [%2$s]</string>
+    <string name="tech_detail">技术细节</string>
+    <string name="item_2">打开文件 /proc/%1$d/maps…\n查找字符串 \"XposedBridge\"…[%2$s]</string>
+    <string name="item_3">抛出测试异常…\n读入错误堆栈…\n</string>
+    <string name="item_4_1">读取应用列表… %1$d 项\n</string>
+    <string name="item_4_2">发现Xposed类应用:</string>
+    <string name="item_5_1">检查 Throwable.getStackTrace() 方法标识符… </string>
+    <string name="item_5_2">\n错误：未发现该方法！</string>
+    <string name="item_6">在环境变量中寻找\"vxp\"… [%1$s]</string>
+    <string name="item_7_1">执行命令行以读取 /system/lib…\n</string>
+    <string name="item_7_2">成功执行.\n</string>
+    <string name="item_7_3">执行出错，权限不足\n</string>
+    <string name="item_8">原生方法，无技术细节。</string>
+    <string name="item_9_1">从系统读取类路径… [%1$s]</string>
+    <string name="item_10">尝试加载类 com.elderdrivers.riru.edxp.config.EdXpConfigGlobal… [%1$s]</string>
+    <string name="item_root">Root 检测方法源自 云闪付 ，无技术细节。</string>
+    <string name="item_exception">发生异常: </string>
+    <string name="item_9_2">执行出错，权限不足</string>
 </resources>

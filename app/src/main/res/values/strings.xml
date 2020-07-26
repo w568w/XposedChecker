@@ -16,4 +16,23 @@
     <string name="about_me">About me</string>
     <string name="refreshing">Refreshing…</string>
     <string name="coffee_please">Coffee,please! :D</string>
+    <string name="item_1">Try loading class de.robv.android.xposed.XposedHelpers… [%1$s]\nTry invoking class de.robv.android.xposed.XposedHelpers… [%2$s]</string>
+    <string name="tech_detail">Tech Detail</string>
+    <string name="item_2">Open file /proc/%1$d/maps…\nLook for string \"XposedBridge\"…[%2$s]</string>
+    <string name="item_3">Throw an exception…\nReading error stack trace…\n</string>
+    <string name="item_4_1">Read installed app list… %1$d item(s)\n</string>
+    <string name="item_4_2">FOUND APP:</string>
+    <string name="item_5_1">Inspect modifiers of Throwable.getStackTrace()… </string>
+    <string name="item_5_2">\nERROR: doesn\'t find such the method.</string>
+    <string name="item_6">Find \"vxp\" in environment variables… [%1$s]</string>
+    <string name="item_7_1">Execute shell to open /system/lib…\n</string>
+    <string name="item_7_2">Executed successfully.\n</string>
+    <string name="item_7_3">Failed to execute for no enough permission.\n</string>
+    <string name="item_8">Method ran in native process.No more technique detail.</string>
+    <string name="item_9_1">Reading class path from system… [%1$s]</string>
+    <string name="item_10">Try loading class com.elderdrivers.riru.edxp.config.EdXpConfigGlobal… [%1$s]</string>
+    <string name="item_root">Root detection doesn\'t contain technique detail.</string>
+    <string name="item_exception">Exception: </string>
+    <string name="item_9_2">Error: Permission denied</string>
+
 </resources>

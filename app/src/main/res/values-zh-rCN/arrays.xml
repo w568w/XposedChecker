@@ -10,6 +10,7 @@
         <item>寻找Xposed运行库文件</item>
         <item>内核查找Xposed链接库</item>
         <item>环境变量特征字判断</item>
+        <item>检测EdXposed环境</item>
     </string-array>
     <string-array name="root_status">
         <item>出错</item>

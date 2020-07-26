@@ -12,9 +12,11 @@ import android.os.Process;
 import android.support.annotation.Keep;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -52,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
     private static String[] ROOT_STATUS;
 
     private ArrayList<Integer> status = new ArrayList<>();
+    private ArrayList<String> techDetails = new ArrayList<>();
+    private static final String[] XPOSED_APPS_LIST = new String[]{"de.robv.android.xposed.installer", "io.va.exposed", "org.meowcat.edxposed.manager", "com.topjohnwu.magisk"};
     private static final int ALL_ALLOW = 0777;
     ListView mListView;
     TextView mStatus;
@@ -126,6 +130,16 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
             mListView.setAdapter(mAdapter);
+            mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle(getString(R.string.tech_detail))
+                            .setMessage(techDetails.get(i))
+                            .setPositiveButton(R.string.OK, null)
+                            .show();
+                }
+            });
         }
         refreshStatus();
 
@@ -160,6 +174,8 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     status.add((int) method.invoke(MainActivity.this));
                 } catch (Throwable e) {
+                    e.printStackTrace();
+                    techDetails.add(getString(R.string.item_exception) + Log.getStackTraceString(e));
                     CrashReport.postCatchedException(e);
                     status.add(0);
                 }
@@ -169,6 +185,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void refresh(final View view) {
+        status.clear();
+        techDetails.clear();
         final TextView textView = (TextView) view;
         textView.setText(R.string.refreshing);
         view.postDelayed(new Runnable() {
@@ -221,16 +239,22 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    @Keep
-    private int check1() {
-
-        return testClassLoader() || testUseClassDirectly() ? 1 : 0;
+    private String toStatus(boolean bool) {
+        return bool ? getString(R.string.item_found_xposed) : getString(R.string.item_no_xposed);
     }
 
-    private boolean testClassLoader() {
+    @Keep
+    private int check1() {
+        techDetails.add(String.format(getString(R.string.item_1)
+                , toStatus(testClassLoader("de.robv.android.xposed.XposedHelpers"))
+                , toStatus(testUseClassDirectly())));
+        return testClassLoader("de.robv.android.xposed.XposedHelpers") || testUseClassDirectly() ? 1 : 0;
+    }
+
+    private boolean testClassLoader(String clazz) {
         try {
             ClassLoader.getSystemClassLoader()
-                    .loadClass("de.robv.android.xposed.XposedHelpers");
+                    .loadClass(clazz);
 
             return true;
         } catch (ClassNotFoundException e) {
@@ -251,56 +275,81 @@ public class MainActivity extends AppCompatActivity {
 
     @Keep
     private int check2() {
-        return checkContains("XposedBridge") ? 1 : 0;
+        boolean result = checkContains("XposedBridge");
+        techDetails.add(String.format(getString(R.string.item_2)
+                , Process.myPid()
+                , toStatus(result)));
+        return result ? 1 : 0;
     }
 
     @Keep
     private int check3() {
+        StringBuilder builder = new StringBuilder(getString(R.string.item_3));
         try {
             throw new Exception();
         } catch (Exception e) {
             StackTraceElement[] arrayOfStackTraceElement = e.getStackTrace();
+
             for (StackTraceElement s : arrayOfStackTraceElement) {
+                builder.append(s.toString());
+                builder.append("\n");
                 if ("de.robv.android.xposed.XposedBridge".equals(s.getClassName())) {
+                    builder.append(String.format("[%s]", toStatus(true)));
+                    techDetails.add(builder.toString());
                     return 1;
                 }
             }
+            builder.append(String.format("[%s]", toStatus(false)));
+            techDetails.add(builder.toString());
             return 0;
         }
     }
 
     @Keep
     private int check4() {
+        StringBuilder builder = new StringBuilder(String.format(getString(R.string.item_4_1), 0));
         try {
             List<PackageInfo> list = getPackageManager().getInstalledPackages(0);
+            builder = new StringBuilder(String.format(getString(R.string.item_4_1), list.size()));
             for (PackageInfo info : list) {
-                if ("de.robv.android.xposed.installer".equals(info.packageName)) {
-                    return 1;
+                for (String pkg : XPOSED_APPS_LIST) {
+                    if (pkg.equals(info.packageName)) {
+                        builder.append(getString(R.string.item_4_2)).append(pkg).append("\n");
+                        techDetails.add(builder.toString());
+                        return 1;
+                    }
                 }
-                if ("io.va.exposed".equals(info.packageName)) {
-                    return 1;
-                }
+
             }
         } catch (Throwable ignored) {
 
         }
+        builder.append("[").append(toStatus(false)).append("]");
+        techDetails.add(builder.toString());
         return 0;
     }
 
     @Keep
     private int check5() {
+        StringBuilder builder = new StringBuilder(getString(R.string.item_5_1));
         try {
             Method method = Throwable.class.getDeclaredMethod("getStackTrace");
+            builder.append("[").append(toStatus(Modifier.isNative(method.getModifiers()))).append("]");
+            techDetails.add(builder.toString());
             return Modifier.isNative(method.getModifiers()) ? 1 : 0;
         } catch (NoSuchMethodException e) {
+            builder.append(getString(R.string.item_5_2));
             e.printStackTrace();
         }
+        techDetails.add(builder.toString());
         return 0;
     }
 
     @Keep
     private int check6() {
-        return System.getProperty("vxp") != null ? 1 : 0;
+        boolean result = System.getProperty("vxp") != null;
+        techDetails.add(String.format(getString(R.string.item_6), toStatus(result)));
+        return result ? 1 : 0;
     }
 
 
@@ -338,14 +387,21 @@ public class MainActivity extends AppCompatActivity {
 
     @Keep
     private int check7() {
+        StringBuilder builder = new StringBuilder(getString(R.string.item_7_1));
         CommandResult commandResult = Shell.run("ls /system/lib");
-        return commandResult.isSuccessful() ? commandResult.getStdout().contains("xposed") ? 1 : 0 : 0;
+        builder.append(commandResult.isSuccessful() ? getString(R.string.item_7_2) : getString(R.string.item_7_3));
+        String out = commandResult.getStdout();
+        boolean result = out.contains("xposed") || out.contains("Xposed");
+        builder.append("[").append(toStatus(result)).append("]");
+        techDetails.add(builder.toString());
+        return commandResult.isSuccessful() ? (result ? 1 : 0) : 0;
     }
 
     @Keep
     private int check8() {
 //        CommandResult commandResult = Shell.run(getFilesDir().getAbsolutePath() + "/checkman " + Process.myPid());
 //        return commandResult.isSuccessful() ? 1 : 0;
+        techDetails.add(getString(R.string.item_8));
         try {
             return NativeDetect.detectXposed() ? 1 : 0;
         } catch (Throwable t) {
@@ -356,13 +412,30 @@ public class MainActivity extends AppCompatActivity {
 
     @Keep
     private int check9() {
-        return System.getenv("CLASSPATH").contains("XposedBridge") ? 1 : 0;
+        boolean result;
+        try {
+            result = System.getenv("CLASSPATH").contains("XposedBridge");
+            techDetails.add(String.format(getString(R.string.item_9_1), toStatus(result)));
+        } catch (NullPointerException e) {
+            result = false;
+            techDetails.add(getString(R.string.item_9_2));
+        }
+
+        return result ? 1 : 0;
     }
 
     @Keep
     private int check10() {
-        try {
+        boolean result = testClassLoader("com.elderdrivers.riru.edxp.config.EdXpConfigGlobal");
+        techDetails.add(String.format(getString(R.string.item_10)
+                , toStatus(result)));
+        return result ? 1 : 0;
+    }
 
+    @Keep
+    private int check11() {
+        try {
+            techDetails.add(getString(R.string.item_root));
             return RootCheckerUtils.detect(this) ? 1 : 0;
         } catch (Throwable t) {
             t.printStackTrace();

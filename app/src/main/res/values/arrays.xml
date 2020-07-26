@@ -10,6 +10,7 @@
         <item>Seek Xposed runtime</item>
         <item>Seek Xposed link library in kernel</item>
         <item>Inspect environmental variable</item>
+        <item>Detect EdXposed env</item>
     </string-array>
     <string-array name="root_status">
         <item>Error</item>
