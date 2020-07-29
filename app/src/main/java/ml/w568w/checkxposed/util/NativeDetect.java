@@ -5,5 +5,5 @@ public class NativeDetect {
         System.loadLibrary("xposed_check");
     }
 
-    public static native boolean detectXposed();
+    public static native boolean detectXposed(int pid);
 }

@@ -29,10 +29,7 @@ import com.tencent.bugly.crashreport.CrashReport;
 import com.unionpay.mobile.device.utils.RootCheckerUtils;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -55,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<Integer> status = new ArrayList<>();
     private ArrayList<String> techDetails = new ArrayList<>();
-    private static final String[] XPOSED_APPS_LIST = new String[]{"de.robv.android.xposed.installer", "io.va.exposed", "org.meowcat.edxposed.manager", "com.topjohnwu.magisk"};
+    private static final String[] XPOSED_APPS_LIST = new String[]{"de.robv.android.xposed.installer", "io.va.exposed", "org.meowcat.edxposed.manager", "com.topjohnwu.magisk", "com.doubee.ig", "com.soft.apk008v", "com.soft.controllers", "biz.bokhorst.xprivacy"};
     private static final int ALL_ALLOW = 0777;
     ListView mListView;
     TextView mStatus;
@@ -97,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             mAdapter = new BaseAdapter() {
                 @Override
                 public int getCount() {
-                    return CHECK_ITEM.length + 1;
+                    return Math.min(status.size(), techDetails.size());
                 }
 
                 @Override
@@ -399,11 +396,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Keep
     private int check8() {
-//        CommandResult commandResult = Shell.run(getFilesDir().getAbsolutePath() + "/checkman " + Process.myPid());
-//        return commandResult.isSuccessful() ? 1 : 0;
         techDetails.add(getString(R.string.item_8));
         try {
-            return NativeDetect.detectXposed() ? 1 : 0;
+            return NativeDetect.detectXposed(Process.myPid()) ? 1 : 0;
         } catch (Throwable t) {
             CrashReport.postCatchedException(t);
             return 0;
@@ -443,48 +438,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class UnpackThread implements Callable<Void> {
-
-        @Override
-        public Void call() throws Exception {
-            if (!new File(getFilesDir().getAbsolutePath() + "/checkman").exists()) {
-                InputStream inputStream = getAssets().open("checkman");
-                OutputStream outputStream = openFileOutput("checkman", MODE_PRIVATE);
-                int bit;
-                while ((bit = inputStream.read()) != -1) {
-                    outputStream.write(bit);
-                }
-            }
-            setFilePermissions(getFilesDir(), ALL_ALLOW, -1, -1);
-            setFilePermissions(getFilesDir().getAbsolutePath() + "/checkman", ALL_ALLOW, -1, -1);
-            return null;
-        }
-
-        /**
-         * 修改文件权限
-         * setFilePermissions(file, 0777, -1, -1);
-         */
-        boolean setFilePermissions(File file, int chmod, int uid, int gid) {
-            if (file != null) {
-                Class<?> fileUtils;
-                try {
-                    fileUtils = Class.forName("android.os.FileUtils");
-                    Method setPermissions = fileUtils.getMethod("setPermissions", File.class, int.class, int.class, int.class);
-                    int result = (Integer) setPermissions.invoke(null, file, chmod, uid, gid);
-
-                    return result == 0;
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-
-                return false;
-            } else {
-                return false;
-            }
-        }
-
-        boolean setFilePermissions(String file, int chmod, int uid, int gid) {
-            return setFilePermissions(new File(file), chmod, uid, gid);
-        }
-    }
 }

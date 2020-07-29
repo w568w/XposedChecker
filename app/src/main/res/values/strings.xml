@@ -7,7 +7,7 @@
     <string name="item_found_xposed">Found</string>
     <string name="about">Developed by w568w… The app helps you assess whether your Xposed hiding module really works. DEBUG INFO:PID=%1$d</string>
     <string name="donation">I\'m a student in my gap year.Buy me a cup of coffee to encourage my development. Thanks you very much! :)</string>
-    <string name="tips">Tip: A low credibility doesn\'t claim low possibility of the presence of Xposed.\nIn fact,there must be something like Xposed so long as it is not 0.</string>
+    <string name="tips">Tip: Please grant ALL permissions the app requested (especially \"reading package list\") for an improved accuracy.\n\nA low credibility doesn\'t claim low possibility of the presence of Xposed.\nIn fact,there must be something like Xposed so long as it is not 0.</string>
     <string name="about_title">About app</string>
     <string name="OK">Got it</string>
     <string name="donation_title">Donation</string>
