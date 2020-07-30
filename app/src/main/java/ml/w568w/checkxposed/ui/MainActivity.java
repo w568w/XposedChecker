@@ -29,7 +29,10 @@ import com.tencent.bugly.crashreport.CrashReport;
 import com.unionpay.mobile.device.utils.RootCheckerUtils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -52,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<Integer> status = new ArrayList<>();
     private ArrayList<String> techDetails = new ArrayList<>();
+    private static String[] sXposedModules;
     private static final String[] XPOSED_APPS_LIST = new String[]{"de.robv.android.xposed.installer", "io.va.exposed", "org.meowcat.edxposed.manager", "com.topjohnwu.magisk", "com.doubee.ig", "com.soft.apk008v", "com.soft.controllers", "biz.bokhorst.xprivacy"};
     private static final int ALL_ALLOW = 0777;
     ListView mListView;
@@ -160,11 +164,22 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private static String readInputStream(InputStream stream) throws IOException {
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = stream.read(buffer)) != -1) {
+            result.write(buffer, 0, length);
+        }
+        return result.toString("UTF-8");
+    }
+
     private class CheckThread implements Callable<Void> {
 
         @Override
         public Void call() throws Exception {
             status.clear();
+            sXposedModules = readInputStream(getAssets().open("xposed_apps.list")).split("\n");
             for (int i = 0; i <= CHECK_ITEM.length; i++) {
                 Method method = MainActivity.class.getDeclaredMethod("check" + (i + 1));
                 method.setAccessible(true);
@@ -429,6 +444,30 @@ public class MainActivity extends AppCompatActivity {
 
     @Keep
     private int check11() {
+        StringBuilder builder = new StringBuilder(String.format(getString(R.string.item_4_1), 0));
+        try {
+            List<PackageInfo> list = getPackageManager().getInstalledPackages(0);
+            builder = new StringBuilder(String.format(getString(R.string.item_4_1), list.size()));
+            for (PackageInfo info : list) {
+                for (String pkg : sXposedModules) {
+                    if (pkg.equals(info.packageName)) {
+                        builder.append(getString(R.string.item_4_2)).append(pkg).append("\n");
+                        techDetails.add(builder.toString());
+                        return 1;
+                    }
+                }
+
+            }
+        } catch (Throwable ignored) {
+
+        }
+        builder.append("[").append(toStatus(false)).append("]");
+        techDetails.add(builder.toString());
+        return 0;
+    }
+
+    @Keep
+    private int check12() {
         try {
             techDetails.add(getString(R.string.item_root));
             return RootCheckerUtils.detect(this) ? 1 : 0;

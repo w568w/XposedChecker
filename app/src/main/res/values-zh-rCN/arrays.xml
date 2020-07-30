@@ -11,6 +11,7 @@
         <item>内核查找Xposed链接库</item>
         <item>环境变量特征字判断</item>
         <item>检测EdXposed环境</item>
+        <item>Xposed模块检查</item>
     </string-array>
     <string-array name="root_status">
         <item>出错</item>
