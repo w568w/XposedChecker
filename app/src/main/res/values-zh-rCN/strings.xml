@@ -34,4 +34,5 @@
     <string name="item_root">Root 检测方法源自 云闪付 ，无技术细节。</string>
     <string name="item_exception">发生异常: </string>
     <string name="item_9_2">执行出错，权限不足</string>
+    <string name="item_11">发现ZUPER XHOOK!\n</string>
 </resources>

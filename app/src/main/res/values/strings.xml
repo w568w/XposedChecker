@@ -34,5 +34,6 @@
     <string name="item_root">Root detection doesn\'t contain technique detail.</string>
     <string name="item_exception">Exception: </string>
     <string name="item_9_2">Error: Permission denied</string>
+    <string name="item_11">ZUPER HOOK detected!\n</string>
 
 </resources>

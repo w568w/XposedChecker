@@ -15,6 +15,7 @@
 #include <android/log.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <dlfcn.h>
 
 #define TAG "JNI"
 #define LOGD(format, ...) __android_log_print(ANDROID_LOG_DEBUG, TAG,\
@@ -22,49 +23,81 @@
 #define LOGE(format, ...) __android_log_print(ANDROID_LOG_ERROR, TAG,\
         "[%s][%d]: " format, __FUNCTION__, __LINE__, ##__VA_ARGS__);
 
-jboolean isXposedMaps(jint pid);
+jboolean isXposedMaps();
 
+static jboolean is_zygote_methods_replaced(JNIEnv *env, jobject thiz);
+
+static jint get_riru_rersion(JNIEnv *env, jobject thiz);
+
+extern "C" {
+#include "pmparser.h"
+}
+procmaps_iterator *maps;
 extern "C" JNIEXPORT jboolean
-
 JNICALL
 Java_ml_w568w_checkxposed_util_NativeDetect_detectXposed(
 
         JNIEnv *env,
         jclass clazz, jint pid) {
-    return isXposedMaps(pid);
-}
-
-long filelength(FILE *fp) {
-//    long num;
-//    int result=fseek(fp, 0, SEEK_END);
-//    LOGD("Result code:%d",result);
-//    num = ftell(fp);
-//    fseek(fp, 0, SEEK_SET);
-//    return num;
-    long length = 0;
-    while (++length && fgetc(fp) != EOF);
-    rewind(fp);
-    return length;
-}
-
-jboolean isXposedMaps(jint pid) {
-    FILE *maps;
-    char path[20];
-    sprintf(path, "/proc/%d/maps", pid);
-    char *content;
-    LOGD("File path:%s", path);
-    if ((maps = fopen(path, "rb")) == nullptr) {
-        LOGE("Can't read maps!");
-        return false;
-    } else {
-        int len = filelength(maps);
-        LOGD("File length:%d", len);
-        content = (char *) malloc(len + 1);
-        fread(content, len, 1, maps);
-        content[len] = '\0';
-        LOGD("Length=%d,\n%s", strlen(content), content);
-        return strstr(content, "XposedBridge") != nullptr;
+    maps = pmparser_parse(pid);
+    if (maps == nullptr) {
+        LOGE("[map]: cannot parse the memory map");
+        return JNI_FALSE;
     }
+    jboolean result =
+            isXposedMaps() || is_zygote_methods_replaced(env, nullptr) || get_riru_rersion(env,
+                                                                                           nullptr) !=
+                                                                          -1;
+    pmparser_free(maps);
+    return result;
 }
 
-#pragma clang diagnostic pop
+//long filelength(FILE *fp) {
+//    long length = 0;
+//    while (++length && fgetc(fp) != EOF);
+//    rewind(fp);
+//    return length;
+//}
+
+//Check if Riru or Xposed enabled.
+//Mainly inspired by https://github.com/RikkaApps/Riru/blob/master/app/src/main/cpp/helper.cpp
+jboolean isXposedMaps() {
+    jboolean res = JNI_FALSE;
+    procmaps_struct *maps_tmp = nullptr;
+    while ((maps_tmp = pmparser_next(maps)) != nullptr) {
+        LOGD("%s", maps_tmp->pathname);
+        if (strstr(maps_tmp->pathname, "libmemtrack_real.so") ||
+            strstr(maps_tmp->pathname, "XposedBridge")) {
+            res = JNI_TRUE;
+        }
+    }
+
+    return res;
+}
+
+static void *handle;
+
+static void *get_handle() {
+    if (handle == nullptr)
+        handle = dlopen(nullptr, 0);
+
+    return handle;
+}
+
+static jint get_riru_rersion(JNIEnv *env, jobject thiz) {
+    static void *sym;
+    void *handle;
+    if ((handle = get_handle()) == nullptr) return -1;
+    if (sym == nullptr) sym = dlsym(handle, "riru_get_version");
+    if (sym) return ((int (*)()) sym)();
+    return -1;
+}
+
+static jboolean is_zygote_methods_replaced(JNIEnv *env, jobject thiz) {
+    static void *sym;
+    void *handle;
+    if ((handle = get_handle()) == nullptr) return JNI_FALSE;
+    if (sym == nullptr) sym = dlsym(handle, "riru_is_zygote_methods_replaced");
+    if (sym) return static_cast<jboolean>(((int (*)()) sym)());
+    return JNI_FALSE;
+}

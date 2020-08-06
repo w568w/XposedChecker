@@ -30,6 +30,7 @@ import com.unionpay.mobile.device.utils.RootCheckerUtils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private static String[] sXposedModules;
     private static final String[] XPOSED_APPS_LIST = new String[]{"de.robv.android.xposed.installer", "io.va.exposed", "org.meowcat.edxposed.manager", "com.topjohnwu.magisk", "com.doubee.ig", "com.soft.apk008v", "com.soft.controllers", "biz.bokhorst.xprivacy"};
     private static final int ALL_ALLOW = 0777;
+    private static final File ZUPER_HOOK_PATH = new File("/system/xbin/ZUPERFAKEFILE");
     ListView mListView;
     TextView mStatus;
     BaseAdapter mAdapter;
@@ -265,14 +267,14 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean testClassLoader(String clazz) {
         try {
+            Class.forName(clazz);
             ClassLoader.getSystemClassLoader()
                     .loadClass(clazz);
 
             return true;
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            return e.getMessage() == null;
         }
-        return false;
     }
 
     private boolean testUseClassDirectly() {
@@ -461,7 +463,13 @@ public class MainActivity extends AppCompatActivity {
         } catch (Throwable ignored) {
 
         }
-        builder.append("[").append(toStatus(false)).append("]");
+        builder.append("[").append(toStatus(false)).append("]\n");
+        if (ZUPER_HOOK_PATH.equals(new File("su"))) {
+            Log.d("MainAct", new File("su").getPath());
+            builder.append(getString(R.string.item_11));
+            techDetails.add(builder.toString());
+            return 1;
+        }
         techDetails.add(builder.toString());
         return 0;
     }
