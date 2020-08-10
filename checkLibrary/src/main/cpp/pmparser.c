@@ -127,7 +127,7 @@ void pmparser_free(procmaps_iterator *p_procmaps_it) {
 
 
 void _pmparser_split_line(
-        char *buf, char *addr1, char *addr2,
+        const char *buf, char *addr1, char *addr2,
         char *perm, char *offset, char *device, char *inode,
         char *pathname) {
     //

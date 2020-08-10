@@ -21,8 +21,8 @@ add_library( # Specifies the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        src/main/cpp/xposed_check.cpp src/main/cpp/pmparser.c)
-include_directories(src/main/cpp/)
+        ../checkLibrary/src/main/cpp/xposed_check.cpp ../checkLibrary/src/main/cpp/pmparser.c)
+include_directories(../app/src/main/cpp)
 find_library( # Sets the name of the path variable.
         log-lib
 

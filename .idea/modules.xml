@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/CheckXposed.iml" filepath="$PROJECT_DIR$/.idea/CheckXposed.iml" group="CheckXposed" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/app.iml" group="CheckXposed/app" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/checkLibrary/checkLibrary.iml" filepath="$PROJECT_DIR$/.idea/modules/checkLibrary/checkLibrary.iml" group="CheckXposed/checkLibrary" />
     </modules>
   </component>
 </project>

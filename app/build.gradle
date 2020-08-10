@@ -10,30 +10,29 @@ android {
         targetSdkVersion 23
         versionCode 9
         versionName "7.1"
+        ndk {
+            abiFilters "armeabi","armeabi-v7a","x86"
+        }
     }
+
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    externalNativeBuild {
-        cmake {
-            path file('CMakeLists.txt')
-        }
-    }
-    ndkVersion '21.3.6528147'
+
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     //implementation 'me.jfenn:Attribouter:0.1.8'
-    compile 'com.android.support:appcompat-v7:23.+'
-    provided 'de.robv.android.xposed:api:53'
-    compile 'com.android.support:cardview-v7:23.+'
-    compile 'com.tencent.bugly:crashreport:latest.release'
-    compile('com.jrummyapps:android-shell:1.0.1@aar') {
-        transitive = true;
+    implementation 'com.android.support:appcompat-v7:23.4.0'
+    compileOnly 'de.robv.android.xposed:api:53'
+    implementation 'com.android.support:cardview-v7:23.4.0'
+    implementation 'com.tencent.bugly:crashreport:3.2.33'
+    implementation('com.jrummyapps:android-shell:1.0.1@aar') {
+        transitive = true
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 

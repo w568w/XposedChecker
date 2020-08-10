@@ -72,10 +72,6 @@ public class MainActivity extends AppCompatActivity {
         ROOT_STATUS = getResources().getStringArray(R.array.root_status);
         try {
 
-//            FutureTask<Void> futureTask = new FutureTask<>(new UnpackThread());
-//            new Thread(futureTask).start();
-//            futureTask.get();
-
             FutureTask<Void> futureTask = new FutureTask<>(new CheckThread());
             new Thread(futureTask).start();
             futureTask.get();
@@ -281,8 +277,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             XposedBridge.log("fuck");
             return true;
-        } catch (Throwable e) {
-            e.printStackTrace();
+        } catch (Throwable ignored) {
         }
         return false;
     }
@@ -481,6 +476,7 @@ public class MainActivity extends AppCompatActivity {
             return RootCheckerUtils.detect(this) ? 1 : 0;
         } catch (Throwable t) {
             t.printStackTrace();
+            techDetails.add(Log.getStackTraceString(t));
             return -1;
         }
     }
